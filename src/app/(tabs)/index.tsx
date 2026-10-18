@@ -1,5 +1,5 @@
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { Link } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -8,7 +8,6 @@ import { images } from '@/constants/images'
 import { useHomeData } from '@/hooks/use-home-data'
 
 export default function HomeScreen() {
-  const router = useRouter()
   const home = useHomeData()
 
   if (!home) return null
@@ -21,24 +20,22 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header: language flag, greeting, streak, notifications */}
         <View className="h-11 flex-row items-center">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Change language"
-            onPress={() => router.push('/language')}>
-            <Image source={{ uri: language.flag }} contentFit="cover" style={styles.flag} />
-          </Pressable>
+          <Link href="/language" asChild>
+            <Pressable accessibilityRole="button" accessibilityLabel="Change language">
+              <Image source={{ uri: language.flag }} contentFit="cover" style={styles.flag} />
+            </Pressable>
+          </Link>
           <Text className="home__greeting ml-3 flex-1">
             {language.greeting}, {firstName}! 👋
           </Text>
           <Image source={images.streakFire} contentFit="contain" style={styles.streakIcon} />
           <Text className="home__streak ml-1 mr-5">{streak}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={8}>
-            <SymbolView
-              name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
-              size={26}
-              tintColor="#0D132B"
-            />
-          </Pressable>
+          {/* Icon only for now. Make it a Link/Pressable once notifications exist. */}
+          <SymbolView
+            name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
+            size={26}
+            tintColor="#0D132B"
+          />
         </View>
 
         {/* Daily goal */}
@@ -61,21 +58,24 @@ export default function HomeScreen() {
           <Text className="home__continue-label mb-3">
             {home.levelLabel} • Unit {home.unitNumber}
           </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Continue ${lesson.title}`}
-            onPress={() => router.push('/learn')}
-            className="home__continue-button active:opacity-90">
-            <Text className="home__continue-button-label">Continue</Text>
-          </Pressable>
+          <Link href="/learn" asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Continue ${lesson.title}`}
+              className="home__continue-button active:opacity-90">
+              <Text className="home__continue-button-label">Continue</Text>
+            </Pressable>
+          </Link>
         </View>
 
         {/* Today's plan */}
         <View className="mt-6 flex-row items-center justify-between">
           <Text className="home__section-title">Today&apos;s plan</Text>
-          <Pressable accessibilityRole="button" onPress={() => router.push('/learn')}>
-            <Text className="home__section-link">View all</Text>
-          </Pressable>
+          <Link href="/learn" asChild>
+            <Pressable accessibilityRole="button">
+              <Text className="home__section-link">View all</Text>
+            </Pressable>
+          </Link>
         </View>
         <View className="mt-1.5">
           {plan.map((item) => (
