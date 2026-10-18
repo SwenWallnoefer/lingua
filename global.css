@@ -117,3 +117,133 @@
   line-height: 26px;
   color: #ffffff;
 }
+
+/* Auth screens (sign up / sign in) */
+@utility auth__title {
+  font-family: 'Poppins-Bold';
+  font-size: 26px;
+  line-height: 36px;
+  color: #0d132b;
+}
+
+@utility auth__subtitle {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 22px;
+  color: #6b7280;
+}
+
+@utility auth__field {
+  min-height: 76px;
+  justify-content: center;
+  border-radius: 22px;
+  border-width: 1px;
+  background-color: #ffffff;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+@utility auth__label {
+  font-family: 'Poppins-Regular';
+  font-size: 12px;
+  line-height: 18px;
+  color: #6b7280;
+}
+
+@utility auth__button {
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background-color: #5b3bf6;
+}
+
+@utility auth__button-label {
+  font-family: 'Poppins-SemiBold';
+  font-size: 17px;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+@utility auth__divider-text {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 20px;
+  color: #6b7280;
+}
+
+@utility auth__social {
+  height: 54px;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 18px;
+  border-width: 1px;
+  background-color: #ffffff;
+  padding-left: 36px;
+}
+
+@utility auth__social-label {
+  font-family: 'Poppins-Medium';
+  font-size: 15px;
+  line-height: 22px;
+  color: #0d132b;
+}
+
+@utility auth__footer {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 20px;
+  color: #6b7280;
+}
+
+@utility auth__footer-link {
+  font-family: 'Poppins-SemiBold';
+  color: #5b3bf6;
+}
+
+/* Verification code modal */
+@utility verify__overlay {
+  flex: 1;
+  justify-content: flex-end;
+  background-color: rgba(13, 19, 43, 0.5);
+}
+
+@utility verify__sheet {
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  background-color: #ffffff;
+  padding: 28px 24px 32px;
+}
+
+@utility verify__title {
+  font-family: 'Poppins-Bold';
+  font-size: 22px;
+  line-height: 30px;
+  text-align: center;
+  color: #0d132b;
+}
+
+@utility verify__text {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+  color: #6b7280;
+}
+
+@utility verify__box {
+  flex: 1;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border-width: 2px;
+  background-color: #f6f7fb;
+}
+
+@utility verify__digit {
+  font-family: 'Poppins-SemiBold';
+  font-size: 22px;
+  line-height: 30px;
+  color: #0d132b;
+}

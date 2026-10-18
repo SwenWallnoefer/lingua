@@ -57,7 +57,7 @@ export default function Onboarding() {
       <View className="mb-6 mt-4 px-6">
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.replace('/')}
+          onPress={() => router.push('/sign-up')}
           className="onboarding__button flex-row items-center justify-center active:opacity-90">
           <Text className="onboarding__button-label mr-9">Get Started</Text>
           <View className="absolute right-6 h-3 w-3 rotate-45 border-r-2 border-t-2 border-white" />
