@@ -88,6 +88,8 @@ export type Lesson = {
   languageCode: LanguageCode
   title: string
   description: string
+  /** Picture shown on the Learn screen. Swap the placeholder for real artwork later. */
+  image: string
   level: LessonLevel
   xpReward: number
   estimatedMinutes: number
