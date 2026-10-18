@@ -19,6 +19,11 @@ export default function Index() {
       <Text variant="h1" className="text-success">
         lingua
       </Text>
+      <Link href="/language">
+        <Text variant="h4" tone="brand">
+          Choose a language
+        </Text>
+      </Link>
       <Link href="/design-system">
         <Text variant="h4" tone="brand">
           View design system

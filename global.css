@@ -247,3 +247,78 @@
   line-height: 30px;
   color: #0d132b;
 }
+
+/* Language selection screen */
+@utility language__title {
+  font-family: 'Poppins-Medium';
+  font-size: 18px;
+  line-height: 26px;
+  color: #0d132b;
+}
+
+@utility language__search {
+  height: 50px;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 25px;
+  border-width: 1px;
+  background-color: #f6f7fb;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+@utility language__section {
+  font-family: 'Poppins-Medium';
+  font-size: 16px;
+  line-height: 24px;
+  color: #0d132b;
+}
+
+@utility language__card {
+  height: 82px;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 22px;
+  border-width: 1.5px;
+  background-color: #ffffff;
+  padding-left: 14px;
+  padding-right: 19px;
+  box-shadow: 0 2px 12px rgba(13, 19, 43, 0.05);
+}
+
+@utility language__name {
+  font-family: 'Poppins-Medium';
+  font-size: 16px;
+  line-height: 24px;
+  color: #0d132b;
+}
+
+@utility language__learners {
+  font-family: 'Poppins-Regular';
+  font-size: 13px;
+  line-height: 20px;
+  color: #6b7280;
+}
+
+@utility language__empty {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+  color: #6b7280;
+}
+
+@utility language__button {
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background-color: #5b3bf6;
+}
+
+@utility language__button-label {
+  font-family: 'Poppins-SemiBold';
+  font-size: 17px;
+  line-height: 24px;
+  color: #ffffff;
+}

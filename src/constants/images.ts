@@ -4,6 +4,7 @@ import mascotAuth from '@/assets/images/mascot-auth.png'
 import googleLogo from '@/assets/images/google-logo.png'
 import facebookLogo from '@/assets/images/facebook-logo.png'
 import appleLogo from '@/assets/images/apple-logo.png'
+import earth from '@/assets/images/earth.png'
 
 export const images = {
   mascotLogo,
@@ -12,4 +13,5 @@ export const images = {
   googleLogo,
   facebookLogo,
   appleLogo,
+  earth,
 }
