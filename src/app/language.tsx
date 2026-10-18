@@ -7,12 +7,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { LanguageCard } from '@/components/language-card'
 import { images } from '@/constants/images'
 import { languages } from '@/data/languages'
+import { useLanguageStore } from '@/store/language-store'
 import type { LanguageCode } from '@/types/learning'
 
 export default function LanguageSelection() {
   const router = useRouter()
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<LanguageCode>('es')
+  const savedLanguage = useLanguageStore((state) => state.selectedLanguage)
+  const setSelectedLanguage = useLanguageStore((state) => state.setSelectedLanguage)
+  const [selected, setSelected] = useState<LanguageCode>(savedLanguage ?? 'es')
 
   const search = query.trim().toLowerCase()
   const visibleLanguages = languages.filter(
@@ -21,6 +24,12 @@ export default function LanguageSelection() {
   )
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/'))
+
+  // Save the choice, then go home. Home only opens once a language is saved.
+  const confirm = () => {
+    setSelectedLanguage(selected)
+    router.replace('/')
+  }
 
   return (
     // No bottom edge, so the earth illustration can sit flush with the bottom of the screen.
@@ -88,7 +97,7 @@ export default function LanguageSelection() {
           {/* Confirm */}
           <Pressable
             accessibilityRole="button"
-            onPress={goBack}
+            onPress={confirm}
             className="language__button mt-5 active:opacity-90">
             <Text className="language__button-label">Continue</Text>
           </Pressable>

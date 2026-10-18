@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useFonts } from 'expo-font'
 import { useEffect } from 'react'
+import { useLanguageStore } from '@/store/language-store'
 import { fontAssets } from '@/theme'
 import '../../global.css'
 
@@ -28,7 +29,9 @@ function RootNavigator() {
   const [fontsLoaded, fontError] = useFonts(fontAssets)
   // Clerk restores the saved session on launch. Wait for it so we never flash the wrong screen.
   const { isLoaded: authLoaded } = useAuth()
-  const ready = (fontsLoaded || fontError) && authLoaded
+  // The saved language is read from AsyncStorage. Wait for it too, so we never flash the wrong screen.
+  const languageLoaded = useLanguageStore((state) => state.hasHydrated)
+  const ready = (fontsLoaded || fontError) && authLoaded && languageLoaded
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync()

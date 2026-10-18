@@ -322,3 +322,23 @@
   line-height: 24px;
   color: #ffffff;
 }
+
+/* Bottom tab bar: full width, docked to the bottom edge */
+@utility tab-bar {
+  background-color: #ffffff;
+  border-top-width: 1px;
+}
+
+@utility tab-bar__row {
+  height: 64px;
+  flex-direction: row;
+  align-items: center;
+}
+
+@utility tab-bar__item {
+  flex: 1;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
