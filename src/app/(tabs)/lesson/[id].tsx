@@ -7,7 +7,13 @@ import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text as RNText, View } from 'react-native'
+import {
+  Pressable,
+  Text as RNText,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 /** Placeholder scores. Real feedback arrives once the AI teacher is connected. */
@@ -20,6 +26,11 @@ const demoFeedback = [
 /** Audio-only lesson with the AI teacher. The lesson id comes from the route. */
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+
+  return <LessonCall key={id} id={id} />
+}
+
+function LessonCall({ id }: { id: string }) {
   const router = useRouter()
   const lesson = getLesson(id)
   const language = lesson ? getLanguage(lesson.languageCode) : undefined
@@ -44,7 +55,8 @@ export default function LessonScreen() {
           <Pressable
             accessibilityRole="button"
             onPress={leaveLesson}
-            className="language__button mt-6 w-full">
+            className="language__button mt-6 w-full"
+          >
             <RNText className="language__button-label">Back to lessons</RNText>
           </Pressable>
         </View>
@@ -62,9 +74,14 @@ export default function LessonScreen() {
           accessibilityRole="button"
           accessibilityLabel="Leave lesson"
           hitSlop={12}
-          onPress={leaveLesson}>
+          onPress={leaveLesson}
+        >
           <SymbolView
-            name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
+            name={{
+              ios: 'chevron.left',
+              android: 'chevron_left',
+              web: 'chevron_left',
+            }}
             size={22}
             weight="semibold"
             tintColor="#0D132B"
@@ -79,7 +96,10 @@ export default function LessonScreen() {
             <RNText className="call__status">Online</RNText>
           </View>
         </View>
-        <View className="call__pill" accessibilityLabel={`${lesson.xpReward} XP reward`}>
+        <View
+          className="call__pill"
+          accessibilityLabel={`${lesson.xpReward} XP reward`}
+        >
           <SymbolView
             name={{ ios: 'bolt.fill', android: 'bolt', web: 'bolt' }}
             size={16}
@@ -91,7 +111,8 @@ export default function LessonScreen() {
 
       <ScrollView
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         {/* Teacher preview. The blurred lesson picture stands in for the room behind the teacher. */}
         <View className="mx-4">
           <View className="call__hero">
@@ -104,7 +125,11 @@ export default function LessonScreen() {
             <View className="absolute inset-0 bg-white/40" />
 
             <View className="absolute inset-x-0 top-5 items-center">
-              <Image source={images.mascotAuth} contentFit="contain" style={styles.mascot} />
+              <Image
+                source={images.mascotAuth}
+                contentFit="contain"
+                style={styles.mascot}
+              />
             </View>
 
             <View className="absolute inset-x-0 top-4 flex-row justify-between px-4">
@@ -159,8 +184,16 @@ export default function LessonScreen() {
             onPress={() => setSpeakerOn((on) => !on)}
             icon={
               speakerOn
-                ? { ios: 'speaker.wave.2.fill', android: 'volume_up', web: 'volume_up' }
-                : { ios: 'speaker.slash.fill', android: 'volume_off', web: 'volume_off' }
+                ? {
+                    ios: 'speaker.wave.2.fill',
+                    android: 'volume_up',
+                    web: 'volume_up',
+                  }
+                : {
+                    ios: 'speaker.slash.fill',
+                    android: 'volume_off',
+                    web: 'volume_off',
+                  }
             }
           />
           <CallControl
@@ -187,7 +220,11 @@ export default function LessonScreen() {
             label="End Call"
             danger
             onPress={leaveLesson}
-            icon={{ ios: 'phone.down.fill', android: 'call_end', web: 'call_end' }}
+            icon={{
+              ios: 'phone.down.fill',
+              android: 'call_end',
+              web: 'call_end',
+            }}
           />
         </View>
 
@@ -218,12 +255,16 @@ export default function LessonScreen() {
             ))}
           </View>
 
-          <RNText className="home__section-title mt-5">Phrases to practice</RNText>
+          <RNText className="home__section-title mt-5">
+            Phrases to practice
+          </RNText>
           <View className="mt-3 gap-3">
             {lesson.phrases.map((phrase) => (
               <View key={phrase.id}>
                 <RNText className="call__phrase">{phrase.text}</RNText>
-                <RNText className="call__phrase-translation">{phrase.translation}</RNText>
+                <RNText className="call__phrase-translation">
+                  {phrase.translation}
+                </RNText>
               </View>
             ))}
           </View>
