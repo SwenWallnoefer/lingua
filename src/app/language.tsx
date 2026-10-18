@@ -7,6 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { LanguageCard } from '@/components/language-card'
 import { images } from '@/constants/images'
 import { languages } from '@/data/languages'
+import { posthogLogs } from '@/lib/posthog-logs'
+import { posthog } from '@/lib/posthog'
 import { useLanguageStore } from '@/store/language-store'
 import type { LanguageCode } from '@/types/learning'
 
@@ -27,6 +29,8 @@ export default function LanguageSelection() {
 
   // Save the choice, then go home. Home only opens once a language is saved.
   const confirm = () => {
+    posthog?.capture('language_selected', { language_code: selected })
+    posthogLogs.info('language selected', { language_code: selected })
     setSelectedLanguage(selected)
     router.replace('/')
   }

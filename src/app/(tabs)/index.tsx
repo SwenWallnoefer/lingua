@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { PlanItem } from '@/components/plan-item'
 import { images } from '@/constants/images'
 import { useHomeData } from '@/hooks/use-home-data'
+import { posthogLogs } from '@/lib/posthog-logs'
+import { posthog } from '@/lib/posthog'
 
 export default function HomeScreen() {
   const home = useHomeData()
@@ -14,6 +16,21 @@ export default function HomeScreen() {
 
   const { firstName, language, lesson, plan, streak, todayXp, dailyGoalXp } = home
   const goalProgress = Math.min(todayXp / dailyGoalXp, 1)
+
+  const startLesson = () => {
+    posthog?.capture('lesson_started', {
+      language_code: language.code,
+      lesson_id: lesson.id,
+      lesson_level: lesson.level,
+      unit_number: home.unitNumber,
+    })
+    posthogLogs.info('lesson started', {
+      language_code: language.code,
+      lesson_id: lesson.id,
+      lesson_level: lesson.level,
+      unit_number: home.unitNumber,
+    })
+  }
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
@@ -62,6 +79,7 @@ export default function HomeScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Continue ${lesson.title}`}
+              onPress={startLesson}
               className="home__continue-button active:opacity-90">
               <Text className="home__continue-button-label">Continue</Text>
             </Pressable>

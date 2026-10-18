@@ -2,6 +2,8 @@ import { useSignIn, useSignUp, useSSO } from '@clerk/expo'
 import { type Href, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Alert } from 'react-native'
+import { posthogLogs } from '@/lib/posthog-logs'
+import { posthog } from '@/lib/posthog'
 
 export type AuthMode = 'sign-up' | 'sign-in'
 export type SocialStrategy = 'oauth_google' | 'oauth_facebook' | 'oauth_apple'
@@ -60,6 +62,8 @@ export function useAuthFlow(mode: AuthMode) {
         const { error } = await signIn.emailCode.sendCode({ emailAddress: email.trim() })
         if (error) return fail(error)
       }
+      posthog?.capture('auth_verification_code_requested', { auth_mode: mode })
+      posthogLogs.info('auth verification code requested', { auth_mode: mode })
       return true
     } finally {
       setBusy(false)
@@ -91,6 +95,8 @@ export function useAuthFlow(mode: AuthMode) {
         const { error: finalizeError } = await signIn.finalize({ navigate: goHome })
         if (finalizeError) return fail(finalizeError)
       }
+      posthog?.capture('auth_completed', { auth_method: 'email_code', auth_mode: mode })
+      posthogLogs.info('auth completed', { auth_method: 'email_code', auth_mode: mode })
       return true
     } finally {
       setBusy(false)
@@ -104,6 +110,8 @@ export function useAuthFlow(mode: AuthMode) {
 
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId, navigate: goHome })
+        posthog?.capture('auth_completed', { auth_method: strategy })
+        posthogLogs.info('auth completed', { auth_method: strategy })
       } else if (pendingSignUp?.status === 'missing_requirements') {
         Alert.alert('Almost there', 'Your account needs more information before you can continue.')
       }
