@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -15,19 +15,19 @@ const CODE_LENGTH = 6
 type VerificationModalProps = {
   visible: boolean
   onClose: () => void
-  /** Called as soon as the last digit is entered. */
-  onVerified: () => void
+  /** Called as soon as the last digit is entered. Resolves to true when the code was accepted. */
+  onSubmit: (code: string) => Promise<boolean>
 }
 
 /** Bottom sheet asking for the 6-digit email code. It stays above the keyboard. */
-export function VerificationModal({ visible, onClose, onVerified }: VerificationModalProps) {
+export function VerificationModal({ visible, onClose, onSubmit }: VerificationModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <View className="verify__overlay">
           {/* Tap outside the sheet to close */}
           <Pressable accessibilityLabel="Close" className="absolute inset-0" onPress={onClose} />
-          <CodeSheet onVerified={onVerified} />
+          <CodeSheet onSubmit={onSubmit} />
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -38,16 +38,28 @@ export function VerificationModal({ visible, onClose, onVerified }: Verification
  * One invisible TextInput holds the value; the boxes only display it.
  * Modal unmounts its children when hidden, so the code starts empty every time it opens.
  */
-function CodeSheet({ onVerified }: { onVerified: () => void }) {
+function CodeSheet({ onSubmit }: { onSubmit: (code: string) => Promise<boolean> }) {
   const [code, setCode] = useState('')
+  const [checking, setChecking] = useState(false)
+  const inputRef = useRef<TextInput>(null)
 
-  const handleChange = (text: string) => {
+  const handleChange = async (text: string) => {
+    if (checking) return
+
     const digits = text.replace(/\D/g, '').slice(0, CODE_LENGTH)
     setCode(digits)
 
     if (digits.length === CODE_LENGTH) {
       Keyboard.dismiss()
-      onVerified()
+      setChecking(true)
+      const accepted = await onSubmit(digits)
+      setChecking(false)
+
+      // Wrong code: start over so the user can type it again.
+      if (!accepted) {
+        setCode('')
+        inputRef.current?.focus()
+      }
     }
   }
 
@@ -68,6 +80,7 @@ function CodeSheet({ onVerified }: { onVerified: () => void }) {
         ))}
 
         <TextInput
+          ref={inputRef}
           value={code}
           onChangeText={handleChange}
           keyboardType="number-pad"

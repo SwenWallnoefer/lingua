@@ -1,11 +1,15 @@
+import { useAuth } from '@clerk/expo'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { Redirect, useRouter } from 'expo-router'
 import { Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '@/constants/images'
 
 export default function Onboarding() {
   const router = useRouter()
+  const { isSignedIn } = useAuth()
+
+  if (isSignedIn) return <Redirect href="/" />
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>

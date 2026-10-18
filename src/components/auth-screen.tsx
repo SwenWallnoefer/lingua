@@ -6,8 +6,7 @@ import { type ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, Text
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { VerificationModal } from '@/components/verification-modal'
 import { images } from '@/constants/images'
-
-type AuthMode = 'sign-up' | 'sign-in'
+import { type AuthMode, type SocialStrategy, useAuthFlow } from '@/hooks/use-auth-flow'
 
 const copy: Record<
   AuthMode,
@@ -31,10 +30,10 @@ const copy: Record<
   },
 }
 
-const socialProviders: { label: string; icon: ImageSourcePropType }[] = [
-  { label: 'Continue with Google', icon: images.googleLogo },
-  { label: 'Continue with Facebook', icon: images.facebookLogo },
-  { label: 'Continue with Apple', icon: images.appleLogo },
+const socialProviders: { label: string; icon: ImageSourcePropType; strategy: SocialStrategy }[] = [
+  { label: 'Continue with Google', icon: images.googleLogo, strategy: 'oauth_google' },
+  { label: 'Continue with Facebook', icon: images.facebookLogo, strategy: 'oauth_facebook' },
+  { label: 'Continue with Apple', icon: images.appleLogo, strategy: 'oauth_apple' },
 ]
 
 const inputStyle = {
@@ -55,12 +54,13 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [verifying, setVerifying] = useState(false)
+  const { busy, sendCode, verifyCode, signInWithProvider } = useAuthFlow(mode)
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/onboarding'))
 
-  const handleVerified = () => {
-    setVerifying(false)
-    router.replace('/')
+  // Clerk emails a code, then the modal asks for it.
+  const handleSubmit = async () => {
+    if (await sendCode(email, password)) setVerifying(true)
   }
 
   return (
@@ -121,6 +121,9 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
             />
           </View>
 
+          {/* Invisible mount point for Clerk's bot protection on sign-up */}
+          {hasPassword && <View nativeID="clerk-captcha" />}
+
           {hasPassword && (
             <View className="auth__field mt-3.5 border-border">
               <Text className="auth__label">Password</Text>
@@ -156,7 +159,8 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => setVerifying(true)}
+            onPress={handleSubmit}
+            disabled={busy}
             className="auth__button mt-5 active:opacity-90">
             <Text className="auth__button-label">{content.button}</Text>
           </Pressable>
@@ -169,10 +173,12 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
           </View>
 
           <View className="mt-3.5 gap-2.5">
-            {socialProviders.map(({ label, icon }) => (
+            {socialProviders.map(({ label, icon, strategy }) => (
               <Pressable
                 key={label}
                 accessibilityRole="button"
+                onPress={() => signInWithProvider(strategy)}
+                disabled={busy}
                 className="auth__social border-border active:opacity-80">
                 <View className="w-7 items-center">
                   <Image source={icon} contentFit="contain" style={{ width: 26, height: 26 }} />
@@ -192,7 +198,7 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
         </View>
       </ScrollView>
 
-      <VerificationModal visible={verifying} onClose={() => setVerifying(false)} onVerified={handleVerified} />
+      <VerificationModal visible={verifying} onClose={() => setVerifying(false)} onSubmit={verifyCode} />
     </SafeAreaView>
   )
 }

@@ -1,6 +1,24 @@
 {
   "version": 1,
   "skills": {
+    "clerk": {
+      "source": "clerk/skills",
+      "sourceType": "github",
+      "skillPath": "skills/clerk/SKILL.md",
+      "computedHash": "61e33bfbc058da6c5924bfca7b2fedc57adf83d79a08014b15625c4b62b344e1"
+    },
+    "clerk-expo": {
+      "source": "clerk/skills",
+      "sourceType": "github",
+      "skillPath": "skills/clerk-expo/SKILL.md",
+      "computedHash": "15c3f265d693cd5a61b6154e686d9b606910e84feeaafbdbaf99bac9db0ad2ba"
+    },
+    "clerk-webhooks": {
+      "source": "clerk/skills",
+      "sourceType": "github",
+      "skillPath": "skills/clerk-webhooks/SKILL.md",
+      "computedHash": "7a9fd8c5c956ad8672eef0592e83df89ce1fc78080a0af9cb853abfe2e549b16"
+    },
     "eas-app-stores": {
       "source": "expo/skills",
       "sourceType": "github",
