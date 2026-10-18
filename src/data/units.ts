@@ -24,6 +24,20 @@ export const units: Unit[] = [
     emoji: '👋',
   },
   {
+    id: 'de-basics',
+    languageCode: 'de',
+    title: 'Basics',
+    description: 'Greet people, introduce yourself and count',
+    emoji: '👋',
+  },
+  {
+    id: 'de-out',
+    languageCode: 'de',
+    title: 'Out & About',
+    description: 'Order, shop and ask for directions',
+    emoji: '🧭',
+  },
+  {
     id: 'ja-basics',
     languageCode: 'ja',
     title: 'Basics',

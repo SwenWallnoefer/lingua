@@ -29,6 +29,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="ai-teacher" options={{ title: 'AI Teacher' }} />
       <Tabs.Screen name="chat" options={{ title: 'Chat' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      {/* Opened from the Learn list. Not a tab itself, so the tab bar skips it. */}
+      <Tabs.Screen name="lesson/[id]" options={{ title: 'Lesson' }} />
     </Tabs>
   )
 }

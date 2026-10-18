@@ -65,9 +65,26 @@ function RootNavigator() {
   const [fontsLoaded, fontError] = useFonts(fontAssets)
   // Clerk restores the saved session on launch. Wait for it so we never flash the wrong screen.
   const { isLoaded: authLoaded } = useAuth()
+  const { isLoaded: userLoaded, user } = useUser()
   // The saved language is read from AsyncStorage. Wait for it too, so we never flash the wrong screen.
   const languageLoaded = useLanguageStore((state) => state.hasHydrated)
-  const ready = (fontsLoaded || fontError) && authLoaded && languageLoaded
+  const migratedUserId = useLanguageStore((state) => state.migratedUserId)
+  const migrateLegacyLanguage = useLanguageStore(
+    (state) => state.migrateLegacyLanguage,
+  )
+  const languageMigrated = !user || migratedUserId === user.id
+  const ready =
+    (fontsLoaded || fontError) &&
+    authLoaded &&
+    userLoaded &&
+    languageLoaded &&
+    languageMigrated
+
+  useEffect(() => {
+    if (authLoaded && userLoaded && languageLoaded && user) {
+      migrateLegacyLanguage(user.id)
+    }
+  }, [authLoaded, userLoaded, languageLoaded, user, migrateLegacyLanguage])
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync()

@@ -30,12 +30,19 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const circleX = useSharedValue(0)
   const hasPlacedCircle = useRef(false)
 
-  const tabWidth = rowWidth / state.routes.length
+  // Only routes with an icon are tabs. Other routes, like a lesson, are opened from a tab.
+  const tabRoutes = state.routes.filter((route) => route.name in icons)
+  const currentRouteName = state.routes[state.index].name
+  // A lesson belongs to Learn, so Learn stays selected while a lesson is open.
+  const activeRouteName = currentRouteName in icons ? currentRouteName : 'learn'
+  const activeIndex = tabRoutes.findIndex((route) => route.name === activeRouteName)
+
+  const tabWidth = rowWidth / tabRoutes.length
 
   // Move the circle to the center of the selected tab.
   useEffect(() => {
     if (!tabWidth) return
-    const target = state.index * tabWidth + (tabWidth - CIRCLE_SIZE) / 2
+    const target = activeIndex * tabWidth + (tabWidth - CIRCLE_SIZE) / 2
     if (hasPlacedCircle.current) {
       circleX.value = withTiming(target, { duration: 250, easing: Easing.out(Easing.cubic) })
     } else {
@@ -43,7 +50,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       circleX.value = target
       hasPlacedCircle.current = true
     }
-  }, [state.index, tabWidth, circleX])
+  }, [activeIndex, tabWidth, circleX])
 
   const circleStyle = useAnimatedStyle(() => ({ transform: [{ translateX: circleX.value }] }))
 
@@ -54,14 +61,17 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         onLayout={(event) => setRowWidth(event.nativeEvent.layout.width)}>
         {tabWidth > 0 && <Animated.View style={[styles.circle, circleStyle]} />}
 
-        {state.routes.map((route, index) => {
-          const focused = state.index === index
+        {tabRoutes.map((route, index) => {
+          const focused = activeIndex === index
           const label = descriptors[route.key].options.title ?? route.name
           const color = focused ? '#FFFFFF' : INACTIVE_COLOR
 
           const onPress = () => {
             const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true })
-            if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params)
+            // Pressing Learn while a lesson is open should still go back to the Learn list.
+            if (currentRouteName !== route.name && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params)
+            }
           }
 
           return (
