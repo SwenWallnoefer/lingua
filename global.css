@@ -342,3 +342,147 @@
   justify-content: center;
   gap: 2px;
 }
+
+/* Home screen */
+@utility home__greeting {
+  font-family: 'Poppins-SemiBold';
+  font-size: 18px;
+  line-height: 26px;
+  color: #0d132b;
+}
+
+@utility home__streak {
+  font-family: 'Poppins-Medium';
+  font-size: 18px;
+  line-height: 26px;
+  color: #0d132b;
+}
+
+@utility home__goal {
+  height: 122px;
+  justify-content: center;
+  border-radius: 24px;
+  background-color: #fff4ea;
+  padding-left: 24px;
+}
+
+@utility home__goal-label {
+  font-family: 'Poppins-Regular';
+  font-size: 15px;
+  line-height: 22px;
+  color: #0d132b;
+}
+
+@utility home__goal-xp {
+  font-family: 'Poppins-Bold';
+  font-size: 34px;
+  line-height: 44px;
+  color: #0d132b;
+}
+
+@utility home__goal-total {
+  font-family: 'Poppins-Regular';
+  font-size: 16px;
+  line-height: 24px;
+  color: #6b7280;
+}
+
+@utility home__goal-track {
+  width: 206px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #fbe9d4;
+}
+
+@utility home__goal-fill {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f59a3b;
+}
+
+@utility home__continue {
+  height: 170px;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 24px;
+  background-image: linear-gradient(135deg, #5b3bf6 0%, #7a5cf7 100%);
+  padding-left: 24px;
+}
+
+@utility home__continue-label {
+  font-family: 'Poppins-Regular';
+  font-size: 16px;
+  line-height: 24px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+@utility home__continue-title {
+  font-family: 'Poppins-SemiBold';
+  font-size: 30px;
+  line-height: 40px;
+  color: #ffffff;
+}
+
+@utility home__continue-button {
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  border-radius: 14px;
+  background-color: #ffffff;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+@utility home__continue-button-label {
+  font-family: 'Poppins-Medium';
+  font-size: 16px;
+  line-height: 24px;
+  color: #5b3bf6;
+}
+
+@utility home__section-title {
+  font-family: 'Poppins-SemiBold';
+  font-size: 17px;
+  line-height: 26px;
+  color: #0d132b;
+}
+
+@utility home__section-link {
+  font-family: 'Poppins-SemiBold';
+  font-size: 16px;
+  line-height: 24px;
+  color: #5b3bf6;
+}
+
+@utility home__plan-icon {
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+@utility home__plan-title {
+  font-family: 'Poppins-Medium';
+  font-size: 16px;
+  line-height: 24px;
+  color: #0d132b;
+}
+
+@utility home__plan-subtitle {
+  font-family: 'Poppins-Regular';
+  font-size: 14px;
+  line-height: 20px;
+  color: #6b7280;
+}
+
+@utility home__plan-check {
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border-width: 2px;
+}
