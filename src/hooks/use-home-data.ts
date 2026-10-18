@@ -1,10 +1,10 @@
-import { useUser } from '@clerk/expo'
 import { getLanguage } from '@/data/languages'
 import { lessons } from '@/data/lessons'
 import { dailyGoalXp, demoProgress } from '@/data/progress'
 import { getUnitsByLanguage } from '@/data/units'
 import { useLanguageStore } from '@/store/language-store'
 import type { LessonLevel } from '@/types/learning'
+import { useUser } from '@clerk/expo'
 
 export type PlanItemId = 'lesson' | 'conversation' | 'words'
 
@@ -23,23 +23,49 @@ const levelLabels: Record<LessonLevel, string> = {
 /** Everything the home screen shows: Clerk user, selected language, and the learning data. */
 export function useHomeData() {
   const { user } = useUser()
-  const selectedLanguage = useLanguageStore((state) => state.selectedLanguage)
+  const selectedLanguage = useLanguageStore((state) =>
+    user ? state.languagesByUser[user.id] : undefined,
+  )
 
   const language = selectedLanguage ? getLanguage(selectedLanguage) : undefined
   if (!language) return null
 
-  const languageLessons = lessons.filter((lesson) => lesson.languageCode === language.code)
+  const languageLessons = lessons.filter(
+    (lesson) => lesson.languageCode === language.code,
+  )
   const lesson =
-    languageLessons.find((item) => !demoProgress.completedLessonIds.includes(item.id)) ??
-    languageLessons[0]
-  if (!lesson) return null
+    languageLessons.find(
+      (item) => !demoProgress.completedLessonIds.includes(item.id),
+    ) ?? languageLessons[0]
+  const firstName = user?.firstName ?? user?.username ?? 'there'
 
-  const unitNumber = getUnitsByLanguage(language.code).findIndex((unit) => unit.id === lesson.unitId) + 1
-  const conversation = lesson.activities.find((activity) => activity.type === 'conversation')
+  if (!lesson) {
+    return {
+      firstName,
+      language,
+      lesson: undefined,
+      streak: demoProgress.streak,
+      todayXp: demoProgress.todayXp,
+      dailyGoalXp,
+    }
+  }
+
+  const unitNumber =
+    getUnitsByLanguage(language.code).findIndex(
+      (unit) => unit.id === lesson.unitId,
+    ) + 1
+  const conversation = lesson.activities.find(
+    (activity) => activity.type === 'conversation',
+  )
   const { todayDone } = demoProgress
 
   const plan: PlanItemData[] = [
-    { id: 'lesson', title: 'Lesson', subtitle: lesson.title, done: todayDone.includes('lesson') },
+    {
+      id: 'lesson',
+      title: 'Lesson',
+      subtitle: lesson.title,
+      done: todayDone.includes('lesson'),
+    },
     {
       id: 'conversation',
       title: 'AI Conversation',
@@ -55,7 +81,7 @@ export function useHomeData() {
   ]
 
   return {
-    firstName: user?.firstName ?? user?.username ?? 'there',
+    firstName,
     language,
     lesson,
     levelLabel: levelLabels[lesson.level],

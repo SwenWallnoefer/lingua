@@ -1,14 +1,14 @@
-import { ClerkProvider, useAuth, useUser } from '@clerk/expo'
-import { tokenCache } from '@clerk/expo/token-cache'
-import { Stack } from 'expo-router'
-import { PostHogProvider, usePostHog } from 'posthog-react-native'
-import * as SplashScreen from 'expo-splash-screen'
-import { StatusBar } from 'expo-status-bar'
-import { useFonts } from 'expo-font'
-import { useEffect, useRef } from 'react'
 import { posthog } from '@/lib/posthog'
 import { useLanguageStore } from '@/store/language-store'
 import { fontAssets } from '@/theme'
+import { ClerkProvider, useAuth, useUser } from '@clerk/expo'
+import { tokenCache } from '@clerk/expo/token-cache'
+import { useFonts } from 'expo-font'
+import { Stack } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import { StatusBar } from 'expo-status-bar'
+import { PostHogProvider, usePostHog } from 'posthog-react-native'
+import { useEffect, useRef } from 'react'
 import '../../global.css'
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
@@ -54,7 +54,7 @@ function PostHogIdentity() {
     if (identifiedUserId.current) client.reset()
 
     const email = user.primaryEmailAddress?.emailAddress
-    client.identify(user.id, email ? { $set: { email } } : undefined)
+    client.identify(user.id, email ? { email } : undefined)
     identifiedUserId.current = user.id
   }, [client, isLoaded, user])
 
@@ -78,7 +78,12 @@ function RootNavigator() {
   return (
     <>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FFFFFF' } }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FFFFFF' },
+        }}
+      />
     </>
   )
 }
