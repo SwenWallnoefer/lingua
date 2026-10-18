@@ -71,3 +71,49 @@
   flex: 1;
   background-color: #f6f7fb;
 }
+
+/* Onboarding screen */
+@utility onboarding__brand {
+  font-family: 'Poppins-SemiBold';
+  font-size: 30px;
+  line-height: 40px;
+  color: #0d132b;
+}
+
+@utility onboarding__title {
+  font-family: 'Poppins-Bold';
+  font-size: 32px;
+  line-height: 48px;
+  color: #0d132b;
+}
+
+@utility onboarding__subtitle {
+  font-family: 'Poppins-Regular';
+  font-size: 15px;
+  line-height: 29px;
+  color: #6b7280;
+}
+
+@utility onboarding__bubble {
+  border-radius: 20px;
+  padding: 14px 18px;
+}
+
+@utility onboarding__bubble-text {
+  font-family: 'Poppins-Medium';
+  font-size: 18px;
+  line-height: 24px;
+}
+
+@utility onboarding__button {
+  height: 72px;
+  border-radius: 28px;
+  background-color: #5b3bf6;
+}
+
+@utility onboarding__button-label {
+  font-family: 'Poppins-SemiBold';
+  font-size: 18px;
+  line-height: 26px;
+  color: #ffffff;
+}
