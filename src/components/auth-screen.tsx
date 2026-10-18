@@ -189,12 +189,15 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
           </View>
 
           {/* Footer */}
-          <Text className="auth__footer mt-auto pb-8 pt-8 text-center">
-            {content.footerText}{' '}
-            <Text className="auth__footer-link" onPress={() => router.replace(content.footerHref)}>
-              {content.footerLink}
-            </Text>
-          </Text>
+          <View className="mt-auto flex-row items-center justify-center pb-8 pt-8">
+            <Text className="auth__footer">{content.footerText} </Text>
+            <Pressable
+              accessibilityRole="link"
+              hitSlop={12}
+              onPress={() => router.replace(content.footerHref)}>
+              <Text className="auth__footer-link">{content.footerLink}</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
 
