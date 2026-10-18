@@ -5,6 +5,9 @@ import googleLogo from '@/assets/images/google-logo.png'
 import facebookLogo from '@/assets/images/facebook-logo.png'
 import appleLogo from '@/assets/images/apple-logo.png'
 import earth from '@/assets/images/earth.png'
+import treasure from '@/assets/images/treasure.png'
+import palace from '@/assets/images/palace.png'
+import streakFire from '@/assets/images/streak-fire.png'
 
 export const images = {
   mascotLogo,
@@ -14,4 +17,7 @@ export const images = {
   facebookLogo,
   appleLogo,
   earth,
+  treasure,
+  palace,
+  streakFire,
 }

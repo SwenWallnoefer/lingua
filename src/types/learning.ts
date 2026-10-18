@@ -5,6 +5,8 @@ export type Language = {
   code: LanguageCode
   name: string
   nativeName: string
+  /** Greeting shown on the home screen, e.g. 'Hola'. */
+  greeting: string
   /** Flag image URL shown on language cards. */
   flag: string
   /** Display-only learner count, e.g. '28.4M'. */

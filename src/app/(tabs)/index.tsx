@@ -1,53 +1,98 @@
-import { useAuth } from '@clerk/expo'
-import { Text } from '@/components/text'
 import { Image } from 'expo-image'
-import { images } from '@/constants/images'
 import { Link } from 'expo-router'
-import { View } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { getLanguage } from '@/data/languages'
-import { useLanguageStore } from '@/store/language-store'
+import { SymbolView } from 'expo-symbols'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { PlanItem } from '@/components/plan-item'
+import { images } from '@/constants/images'
+import { useHomeData } from '@/hooks/use-home-data'
 
-/** Testing helper: forget the saved language, then wipe AsyncStorage. */
-const clearStorage = async () => {
-  // Reset the in-memory value first. Otherwise the store would write it back to storage.
-  useLanguageStore.setState({ selectedLanguage: null })
-  await AsyncStorage.clear()
-}
+export default function HomeScreen() {
+  const home = useHomeData()
 
-export default function Index() {
-  const { signOut } = useAuth()
-  const selectedLanguage = useLanguageStore((state) => state.selectedLanguage)
+  if (!home) return null
+
+  const { firstName, language, lesson, plan, streak, todayXp, dailyGoalXp } = home
+  const goalProgress = Math.min(todayXp / dailyGoalXp, 1)
 
   return (
-    <View className="flex-1 items-center justify-center gap-4 bg-background px-6">
-      <Image
-        source={images.mascotLogo}
-        style={{ width: 160, height: 160 }}
-      />
-      <Text variant="h1" className="text-success">
-        lingua
-      </Text>
-      {/* Testing only: remove once the home screen is built. */}
-      <Text variant="bodyMd" tone="secondary">
-        Selected language: {selectedLanguage && getLanguage(selectedLanguage)?.name}
-      </Text>
-      <Link href="/language">
-        <Text variant="h4" tone="brand">
-          Choose a language
-        </Text>
-      </Link>
-      <Link href="/design-system">
-        <Text variant="h4" tone="brand">
-          View design system
-        </Text>
-      </Link>
-      <Text variant="h4" tone="brand" onPress={() => signOut()}>
-        Sign out
-      </Text>
-      <Text variant="h4" className="text-streak" onPress={clearStorage}>
-        Clear storage (testing)
-      </Text>
-    </View>
+    <SafeAreaView edges={['top']} style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Header: language flag, greeting, streak, notifications */}
+        <View className="h-11 flex-row items-center">
+          <Link href="/language" asChild>
+            <Pressable accessibilityRole="button" accessibilityLabel="Change language">
+              <Image source={{ uri: language.flag }} contentFit="cover" style={styles.flag} />
+            </Pressable>
+          </Link>
+          <Text className="home__greeting ml-3 flex-1">
+            {language.greeting}, {firstName}! 👋
+          </Text>
+          <Image source={images.streakFire} contentFit="contain" style={styles.streakIcon} />
+          <Text className="home__streak ml-1 mr-5">{streak}</Text>
+          {/* Icon only for now. Make it a Link/Pressable once notifications exist. */}
+          <SymbolView
+            name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
+            size={26}
+            tintColor="#0D132B"
+          />
+        </View>
+
+        {/* Daily goal */}
+        <View className="home__goal mt-5">
+          <Text className="home__goal-label">Daily goal</Text>
+          <Text className="home__goal-xp mt-1">
+            {todayXp} <Text className="home__goal-total">/ {dailyGoalXp} XP</Text>
+          </Text>
+          <View className="home__goal-track mt-2">
+            <View className="home__goal-fill" style={{ width: `${goalProgress * 100}%` }} />
+          </View>
+          <Image source={images.treasure} contentFit="contain" style={styles.treasure} />
+        </View>
+
+        {/* Continue learning */}
+        <View className="home__continue mt-5">
+          <Image source={images.palace} contentFit="contain" style={styles.palace} />
+          <Text className="home__continue-label">Continue learning</Text>
+          <Text className="home__continue-title">{language.name}</Text>
+          <Text className="home__continue-label mb-3">
+            {home.levelLabel} • Unit {home.unitNumber}
+          </Text>
+          <Link href="/learn" asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Continue ${lesson.title}`}
+              className="home__continue-button active:opacity-90">
+              <Text className="home__continue-button-label">Continue</Text>
+            </Pressable>
+          </Link>
+        </View>
+
+        {/* Today's plan */}
+        <View className="mt-6 flex-row items-center justify-between">
+          <Text className="home__section-title">Today&apos;s plan</Text>
+          <Link href="/learn" asChild>
+            <Pressable accessibilityRole="button">
+              <Text className="home__section-link">View all</Text>
+            </Pressable>
+          </Link>
+        </View>
+        <View className="mt-1.5">
+          {plan.map((item) => (
+            <PlanItem key={item.id} item={item} />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
+
+// expo-image ignores className, so images are sized with styles.
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: '#FFFFFF' },
+  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
+  flag: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB' },
+  streakIcon: { width: 32, height: 32 },
+  treasure: { position: 'absolute', right: 16, top: 6, width: 110, height: 110 },
+  palace: { position: 'absolute', right: -29, top: 3, width: 200, height: 200 },
+})
