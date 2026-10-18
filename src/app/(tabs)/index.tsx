@@ -1,38 +1,120 @@
+import { PlanItem } from '@/components/plan-item'
+import { images } from '@/constants/images'
+import { useHomeData } from '@/hooks/use-home-data'
+import { posthog } from '@/lib/posthog'
+import { posthogLogs } from '@/lib/posthog-logs'
 import { Image } from 'expo-image'
 import { Link } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { PlanItem } from '@/components/plan-item'
-import { images } from '@/constants/images'
-import { useHomeData } from '@/hooks/use-home-data'
 
 export default function HomeScreen() {
   const home = useHomeData()
 
   if (!home) return null
 
-  const { firstName, language, lesson, plan, streak, todayXp, dailyGoalXp } = home
+  if (!home.lesson) {
+    return (
+      <SafeAreaView edges={['top']} style={styles.screen}>
+        <View className="flex-1 px-5 pt-2">
+          <View className="h-11 flex-row items-center">
+            <Link href="/language" asChild>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Change language"
+              >
+                <Image
+                  source={{ uri: home.language.flag }}
+                  contentFit="cover"
+                  style={styles.flag}
+                />
+              </Pressable>
+            </Link>
+            <Text className="home__greeting ml-3">{home.language.name}</Text>
+          </View>
+
+          <View className="flex-1 justify-center">
+            <View className="card items-center px-6 py-8">
+              <Text className="auth__title text-center">
+                {home.language.name} lessons are coming soon
+              </Text>
+              <Text className="language__empty mt-3">
+                We&apos;re preparing your first lesson. Choose another language
+                to start learning now.
+              </Text>
+              <Link href="/language" asChild>
+                <Pressable
+                  accessibilityRole="button"
+                  className="language__button mt-6 w-full"
+                >
+                  <Text className="language__button-label">
+                    Choose another language
+                  </Text>
+                </Pressable>
+              </Link>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  const { firstName, language, lesson, plan, streak, todayXp, dailyGoalXp } =
+    home
   const goalProgress = Math.min(todayXp / dailyGoalXp, 1)
+
+  const startLesson = () => {
+    posthog?.capture('lesson_started', {
+      language_code: language.code,
+      lesson_id: lesson.id,
+      lesson_level: lesson.level,
+      unit_number: home.unitNumber,
+    })
+    posthogLogs.info('lesson started', {
+      language_code: language.code,
+      lesson_id: lesson.id,
+      lesson_level: lesson.level,
+      unit_number: home.unitNumber,
+    })
+  }
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header: language flag, greeting, streak, notifications */}
         <View className="h-11 flex-row items-center">
           <Link href="/language" asChild>
-            <Pressable accessibilityRole="button" accessibilityLabel="Change language">
-              <Image source={{ uri: language.flag }} contentFit="cover" style={styles.flag} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change language"
+            >
+              <Image
+                source={{ uri: language.flag }}
+                contentFit="cover"
+                style={styles.flag}
+              />
             </Pressable>
           </Link>
           <Text className="home__greeting ml-3 flex-1">
             {language.greeting}, {firstName}! 👋
           </Text>
-          <Image source={images.streakFire} contentFit="contain" style={styles.streakIcon} />
+          <Image
+            source={images.streakFire}
+            contentFit="contain"
+            style={styles.streakIcon}
+          />
           <Text className="home__streak ml-1 mr-5">{streak}</Text>
           {/* Icon only for now. Make it a Link/Pressable once notifications exist. */}
           <SymbolView
-            name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
+            name={{
+              ios: 'bell',
+              android: 'notifications_none',
+              web: 'notifications_none',
+            }}
             size={26}
             tintColor="#0D132B"
           />
@@ -42,17 +124,29 @@ export default function HomeScreen() {
         <View className="home__goal mt-5">
           <Text className="home__goal-label">Daily goal</Text>
           <Text className="home__goal-xp mt-1">
-            {todayXp} <Text className="home__goal-total">/ {dailyGoalXp} XP</Text>
+            {todayXp}{' '}
+            <Text className="home__goal-total">/ {dailyGoalXp} XP</Text>
           </Text>
           <View className="home__goal-track mt-2">
-            <View className="home__goal-fill" style={{ width: `${goalProgress * 100}%` }} />
+            <View
+              className="home__goal-fill"
+              style={{ width: `${goalProgress * 100}%` }}
+            />
           </View>
-          <Image source={images.treasure} contentFit="contain" style={styles.treasure} />
+          <Image
+            source={images.treasure}
+            contentFit="contain"
+            style={styles.treasure}
+          />
         </View>
 
         {/* Continue learning */}
         <View className="home__continue mt-5">
-          <Image source={images.palace} contentFit="contain" style={styles.palace} />
+          <Image
+            source={images.palace}
+            contentFit="contain"
+            style={styles.palace}
+          />
           <Text className="home__continue-label">Continue learning</Text>
           <Text className="home__continue-title">{language.name}</Text>
           <Text className="home__continue-label mb-3">
@@ -62,7 +156,9 @@ export default function HomeScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Continue ${lesson.title}`}
-              className="home__continue-button active:opacity-90">
+              onPress={startLesson}
+              className="home__continue-button active:opacity-90"
+            >
               <Text className="home__continue-button-label">Continue</Text>
             </Pressable>
           </Link>
@@ -91,8 +187,20 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
-  flag: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB' },
+  flag: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
   streakIcon: { width: 32, height: 32 },
-  treasure: { position: 'absolute', right: 16, top: 6, width: 110, height: 110 },
+  treasure: {
+    position: 'absolute',
+    right: 16,
+    top: 6,
+    width: 110,
+    height: 110,
+  },
   palace: { position: 'absolute', right: -29, top: 3, width: 200, height: 200 },
 })

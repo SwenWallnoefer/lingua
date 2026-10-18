@@ -1,43 +1,75 @@
+import { LanguageCard } from '@/components/language-card'
+import { images } from '@/constants/images'
+import { languages } from '@/data/languages'
+import { posthog } from '@/lib/posthog'
+import { posthogLogs } from '@/lib/posthog-logs'
+import { useLanguageStore } from '@/store/language-store'
+import type { LanguageCode } from '@/types/learning'
+import { useUser } from '@clerk/expo'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { LanguageCard } from '@/components/language-card'
-import { images } from '@/constants/images'
-import { languages } from '@/data/languages'
-import { useLanguageStore } from '@/store/language-store'
-import type { LanguageCode } from '@/types/learning'
 
 export default function LanguageSelection() {
   const router = useRouter()
+  const { user } = useUser()
   const [query, setQuery] = useState('')
-  const savedLanguage = useLanguageStore((state) => state.selectedLanguage)
-  const setSelectedLanguage = useLanguageStore((state) => state.setSelectedLanguage)
-  const [selected, setSelected] = useState<LanguageCode>(savedLanguage ?? 'es')
+  const savedLanguage = useLanguageStore((state) =>
+    user ? state.languagesByUser[user.id] : undefined,
+  )
+  const setSelectedLanguage = useLanguageStore(
+    (state) => state.setSelectedLanguage,
+  )
+  const [selection, setSelection] = useState<{
+    userId: string | undefined
+    language: LanguageCode
+  }>(() => ({ userId: user?.id, language: savedLanguage ?? 'es' }))
+  const selected =
+    selection.userId === user?.id ? selection.language : (savedLanguage ?? 'es')
+  const selectLanguage = (language: LanguageCode) =>
+    setSelection({ userId: user?.id, language })
 
   const search = query.trim().toLowerCase()
   const visibleLanguages = languages.filter(
     ({ name, nativeName }) =>
-      name.toLowerCase().includes(search) || nativeName.toLowerCase().includes(search),
+      name.toLowerCase().includes(search) ||
+      nativeName.toLowerCase().includes(search),
   )
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/'))
+  const goBack = () =>
+    router.canGoBack() ? router.back() : router.replace('/')
 
   // Save the choice, then go home. Home only opens once a language is saved.
   const confirm = () => {
-    setSelectedLanguage(selected)
+    if (!user) return
+
+    posthog?.capture('language_selected', { language_code: selected })
+    posthogLogs.info('language selected', { language_code: selected })
+    setSelectedLanguage(user.id, selected)
     router.replace('/')
   }
 
   return (
     // No bottom edge, so the earth illustration can sit flush with the bottom of the screen.
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <SafeAreaView
+      edges={['top']}
+      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+    >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View className="px-4">
           {/* Header */}
           <View className="mt-1 h-12 justify-center">
@@ -46,15 +78,23 @@ export default function LanguageSelection() {
               accessibilityLabel="Go back"
               onPress={goBack}
               hitSlop={8}
-              className="h-11 w-11 justify-center">
+              className="h-11 w-11 justify-center"
+            >
               <SymbolView
-                name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
+                name={{
+                  ios: 'chevron.left',
+                  android: 'chevron_left',
+                  web: 'chevron_left',
+                }}
                 size={22}
                 weight="semibold"
                 tintColor="#0D132B"
               />
             </Pressable>
-            <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
+            <View
+              className="absolute inset-0 items-center justify-center"
+              pointerEvents="none"
+            >
               <Text className="language__title">Choose a language</Text>
             </View>
           </View>
@@ -62,7 +102,11 @@ export default function LanguageSelection() {
           {/* Search */}
           <View className="language__search mt-3.5 border-border">
             <SymbolView
-              name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
+              name={{
+                ios: 'magnifyingglass',
+                android: 'search',
+                web: 'search',
+              }}
               size={20}
               tintColor="#5B6280"
             />
@@ -86,11 +130,13 @@ export default function LanguageSelection() {
                 key={language.code}
                 language={language}
                 selected={language.code === selected}
-                onPress={() => setSelected(language.code)}
+                onPress={() => selectLanguage(language.code)}
               />
             ))}
             {visibleLanguages.length === 0 && (
-              <Text className="language__empty py-6">No languages found for “{query.trim()}”</Text>
+              <Text className="language__empty py-6">
+                No languages found for “{query.trim()}”
+              </Text>
             )}
           </View>
 
@@ -98,13 +144,17 @@ export default function LanguageSelection() {
           <Pressable
             accessibilityRole="button"
             onPress={confirm}
-            className="language__button mt-5 active:opacity-90">
+            className="language__button mt-5 active:opacity-90"
+          >
             <Text className="language__button-label">Continue</Text>
           </Pressable>
         </View>
 
         {/* Earth illustration: crop the image's empty top and bottom padding */}
-        <View className="mt-auto h-[190px] overflow-hidden" pointerEvents="none">
+        <View
+          className="mt-auto h-[190px] overflow-hidden"
+          pointerEvents="none"
+        >
           <Image
             source={images.earth}
             contentFit="contain"

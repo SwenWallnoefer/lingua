@@ -1,12 +1,14 @@
-import { ClerkProvider, useAuth } from '@clerk/expo'
+import { posthog } from '@/lib/posthog'
+import { useLanguageStore } from '@/store/language-store'
+import { fontAssets } from '@/theme'
+import { ClerkProvider, useAuth, useUser } from '@clerk/expo'
 import { tokenCache } from '@clerk/expo/token-cache'
+import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-import { useFonts } from 'expo-font'
-import { useEffect } from 'react'
-import { useLanguageStore } from '@/store/language-store'
-import { fontAssets } from '@/theme'
+import { PostHogProvider, usePostHog } from 'posthog-react-native'
+import { useEffect, useRef } from 'react'
 import '../../global.css'
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
@@ -20,9 +22,43 @@ SplashScreen.preventAutoHideAsync()
 export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootNavigator />
+      {posthog ? (
+        <PostHogProvider client={posthog}>
+          <PostHogIdentity />
+          <RootNavigator />
+        </PostHogProvider>
+      ) : (
+        <RootNavigator />
+      )}
     </ClerkProvider>
   )
+}
+
+function PostHogIdentity() {
+  const client = usePostHog()
+  const { isLoaded, user } = useUser()
+  const identifiedUserId = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!isLoaded) return
+
+    if (!user) {
+      if (identifiedUserId.current) client.reset()
+      identifiedUserId.current = null
+      return
+    }
+
+    if (identifiedUserId.current === user.id) return
+
+    // Do not carry analytics identity across an account switch on the same device.
+    if (identifiedUserId.current) client.reset()
+
+    const email = user.primaryEmailAddress?.emailAddress
+    client.identify(user.id, email ? { email } : undefined)
+    identifiedUserId.current = user.id
+  }, [client, isLoaded, user])
+
+  return null
 }
 
 function RootNavigator() {
@@ -42,7 +78,12 @@ function RootNavigator() {
   return (
     <>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FFFFFF' } }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FFFFFF' },
+        }}
+      />
     </>
   )
 }
