@@ -7,7 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "lingua",
     "userInterfaceStyle": "light",
-    "ios": {},
+    "ios": {
+      "bundleIdentifier": "com.anonymous.lingua"
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
