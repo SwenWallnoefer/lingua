@@ -1,8 +1,11 @@
 import { CallControl } from '@/components/call-control'
+import { StreamProvider } from '@/components/stream-provider'
 import { Text } from '@/components/text'
 import { images } from '@/constants/images'
 import { getLanguage } from '@/data/languages'
 import { getLesson } from '@/data/lessons'
+import { useLessonCall, type CallPhase } from '@/hooks/use-lesson-call'
+import { useUser } from '@clerk/expo'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
@@ -23,11 +26,33 @@ const demoFeedback = [
   { label: 'Grammar', value: 'Good', color: '#5B3BF6' },
 ]
 
+/** Text and dot color for each stage of the call. */
+const phaseStatus: Record<CallPhase, { label: string; dot: string }> = {
+  idle: { label: 'Ready to start', dot: 'bg-ink-secondary' },
+  loading: { label: 'Preparing your call…', dot: 'bg-warning' },
+  connecting: { label: 'Connecting…', dot: 'bg-warning' },
+  joined: { label: 'Connected', dot: 'bg-success' },
+  ended: { label: 'Call ended', dot: 'bg-ink-secondary' },
+  error: { label: 'Connection problem', dot: 'bg-error' },
+}
+
+const startLabels: Partial<Record<CallPhase, string>> = {
+  idle: 'Start lesson',
+  loading: 'Preparing…',
+  connecting: 'Connecting…',
+  ended: 'Start again',
+  error: 'Try again',
+}
+
 /** Audio-only lesson with the AI teacher. The lesson id comes from the route. */
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
 
-  return <LessonCall key={id} id={id} />
+  return (
+    <StreamProvider>
+      <LessonCall key={id} id={id} />
+    </StreamProvider>
+  )
 }
 
 function LessonCall({ id }: { id: string }) {
@@ -35,9 +60,24 @@ function LessonCall({ id }: { id: string }) {
   const lesson = getLesson(id)
   const language = lesson ? getLanguage(lesson.languageCode) : undefined
 
-  const [micOn, setMicOn] = useState(true)
-  const [speakerOn, setSpeakerOn] = useState(true)
+  const { user } = useUser()
+  const {
+    phase,
+    error,
+    micOn,
+    speakerOn,
+    startCall,
+    endCall,
+    toggleMic,
+    toggleSpeaker,
+  } = useLessonCall(id)
   const [subtitlesOn, setSubtitlesOn] = useState(true)
+
+  const status = phaseStatus[phase]
+  const joined = phase === 'joined'
+  const starting = phase === 'loading' || phase === 'connecting'
+  const startLabel = startLabels[phase]
+  const userName = user?.fullName ?? user?.username ?? 'Learner'
 
   // The lesson screen is a hidden tab, so go to Learn explicitly instead of router.back().
   const leaveLesson = () => router.navigate('/learn')
@@ -92,8 +132,8 @@ function LessonCall({ id }: { id: string }) {
             {lesson.title}
           </RNText>
           <View className="flex-row items-center gap-2">
-            <View className="h-2.5 w-2.5 rounded-full bg-success" />
-            <RNText className="call__status">Online</RNText>
+            <View className={`h-2.5 w-2.5 rounded-full ${status.dot}`} />
+            <RNText className="call__status">{status.label}</RNText>
           </View>
         </View>
         <View
@@ -145,10 +185,10 @@ function LessonCall({ id }: { id: string }) {
               </View>
               <View className="call__chip">
                 <View
-                  className={`h-2 w-2 rounded-full ${micOn ? 'bg-success' : 'bg-error'}`}
+                  className={`h-2 w-2 rounded-full ${joined ? (micOn ? 'bg-success' : 'bg-error') : status.dot}`}
                 />
                 <RNText className="call__chip-label">
-                  {micOn ? 'Listening' : 'Mic muted'}
+                  {joined ? (micOn ? 'Listening' : 'Mic muted') : status.label}
                 </RNText>
               </View>
             </View>
@@ -181,7 +221,8 @@ function LessonCall({ id }: { id: string }) {
           <CallControl
             label="Speaker"
             active={speakerOn}
-            onPress={() => setSpeakerOn((on) => !on)}
+            disabled={!joined}
+            onPress={toggleSpeaker}
             icon={
               speakerOn
                 ? {
@@ -199,7 +240,8 @@ function LessonCall({ id }: { id: string }) {
           <CallControl
             label="Mic"
             active={micOn}
-            onPress={() => setMicOn((on) => !on)}
+            disabled={!joined}
+            onPress={toggleMic}
             icon={
               micOn
                 ? { ios: 'mic.fill', android: 'mic', web: 'mic' }
@@ -219,7 +261,7 @@ function LessonCall({ id }: { id: string }) {
           <CallControl
             label="End Call"
             danger
-            onPress={leaveLesson}
+            onPress={joined || starting ? endCall : leaveLesson}
             icon={{
               ios: 'phone.down.fill',
               android: 'call_end',
@@ -228,8 +270,66 @@ function LessonCall({ id }: { id: string }) {
           />
         </View>
 
+        {/* Start the call, or try again after an error or when it ended */}
+        {error && (
+          <View className="call__error mx-5 mt-6">
+            <RNText className="call__error-text">{error}</RNText>
+          </View>
+        )}
+        {startLabel && (
+          <Pressable
+            accessibilityRole="button"
+            disabled={starting}
+            onPress={startCall}
+            className={`language__button mx-5 mt-4 ${starting ? 'opacity-60' : 'active:opacity-80'}`}
+          >
+            <RNText className="language__button-label">{startLabel}</RNText>
+          </Pressable>
+        )}
+
+        {/* The learner in this call */}
+        <View className="call__user mx-5 mt-6">
+          {user?.imageUrl ? (
+            <Image
+              source={{ uri: user.imageUrl }}
+              contentFit="cover"
+              style={styles.avatar}
+            />
+          ) : (
+            <View
+              className="items-center justify-center bg-primary"
+              style={styles.avatar}
+            >
+              <RNText className="call__user-name text-white">
+                {userName.charAt(0).toUpperCase()}
+              </RNText>
+            </View>
+          )}
+          <View className="flex-1">
+            <RNText numberOfLines={1} className="call__user-name">
+              {userName} (You)
+            </RNText>
+            <RNText className="call__user-status">
+              {joined
+                ? micOn
+                  ? 'Microphone on'
+                  : 'Microphone muted'
+                : status.label}
+            </RNText>
+          </View>
+          <SymbolView
+            name={
+              joined && micOn
+                ? { ios: 'mic.fill', android: 'mic', web: 'mic' }
+                : { ios: 'mic.slash.fill', android: 'mic_off', web: 'mic_off' }
+            }
+            size={22}
+            tintColor={joined && micOn ? '#4CB33A' : '#6B7280'}
+          />
+        </View>
+
         {/* Lesson feedback */}
-        <View className="call__feedback mx-5 mt-6">
+        <View className="call__feedback mx-5 mt-4">
           {demoFeedback.map(({ label, value, color }, index) => (
             <View key={label} className="flex-row flex-1">
               {index > 0 && <View className="call__feedback-divider" />}
@@ -280,4 +380,5 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   mascot: { width: 380, height: 380 },
   flag: { width: 20, height: 14, borderRadius: 3 },
+  avatar: { width: 44, height: 44, borderRadius: 22 },
 })

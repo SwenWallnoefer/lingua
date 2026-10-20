@@ -9,18 +9,21 @@ type CallControlProps = {
   active?: boolean
   /** Red button used for ending the call. */
   danger?: boolean
+  /** Dimmed and not pressable, e.g. before the call has started. */
+  disabled?: boolean
 }
 
 /** Round button with a label underneath. Used in the audio lesson control row. */
-export function CallControl({ label, icon, onPress, active, danger }: CallControlProps) {
+export function CallControl({ label, icon, onPress, active, danger, disabled }: CallControlProps) {
   const style = danger ? 'call__control-end' : active ? 'call__control-active' : ''
 
   return (
-    <View className="items-center gap-2">
+    <View className={`items-center gap-2 ${disabled ? 'opacity-40' : ''}`}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityState={active === undefined ? undefined : { selected: active }}
+        accessibilityState={{ selected: active, disabled }}
+        disabled={disabled}
         onPress={onPress}
         className={`call__control active:opacity-80 ${style}`}>
         <SymbolView name={icon} size={24} tintColor={danger ? '#FFFFFF' : '#0D132B'} />
